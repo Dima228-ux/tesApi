@@ -1,0 +1,38 @@
+server {
+        server_name dima2.local;
+        root /home/dima/web/testApi;
+        index index.php;
+
+        error_log /var/log/nginx/dima_error.log;
+
+        location / {
+                index index.php;
+                try_files $uri $uri/ /index.php?$args;
+        }
+
+        gzip on;
+        gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+
+        location ~ \.(js|css|png|jpg|gif|swf|ico|pdf|mov|fla|zip|rar)$ {
+                # включать только после  прочтения этого
+                # expires max;
+                try_files $uri =404;
+        }
+
+        location ~ ^/(protected|framework|themes/\w+/views) {
+                deny  all;
+        }
+
+        location ~* \.(php)$ {
+                fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+                fastcgi_index index.php;
+                include fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_param PATH_INFO $fastcgi_path_info;
+        }
+
+        location ~ /\. {
+                deny all;
+                log_not_found off;
+        }
+}
